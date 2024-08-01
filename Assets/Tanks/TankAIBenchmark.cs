@@ -1,35 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TankAIBenchmark : MonoBehaviour
 {
-    GameObject[] tanks;
-    public int numberOfTanks;
-    public GameObject tankPrefab;
+    [SerializeField] private int _numberOfTanks;
+    [SerializeField] private GameObject _tankPrefab;
+    [SerializeField] private float _forwardSpeed = 0.01f;
+    [SerializeField] private float _spawnPosSpreadXZ = 50f;
 
-    // Start is called before the first frame update
-    void Start()
+    private Transform[] _tanksTransform;
+    private Transform _playerTransform;
+    private string _playerTag = "Player";
+
+
+    private void Awake()
     {
-        tanks = new GameObject[numberOfTanks];
-        for (int i = 0; i < numberOfTanks; i++)
+        GameObject player = GameObject.FindGameObjectWithTag(_playerTag);
+
+        if (player != null)
         {
-            tanks[i] = Instantiate(tankPrefab);
-            tanks[i].transform.position = new Vector3(Random.Range(-50,50), 0, Random.Range(-50,50));
+            _playerTransform = player.transform;
+        }
+        else
+        {
+            Debug.Log($"# Error, {nameof(player)} is null. - {gameObject.name}.");
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        foreach (GameObject t in tanks)
+        _tanksTransform = new Transform[_numberOfTanks];
+
+        for (int i = 0; i < _numberOfTanks; i++)
         {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                t.transform.LookAt(player.transform.position);
-                t.transform.Translate(0, 0, 0.05f);
-            }
-        } 
+            _tanksTransform[i] = Instantiate(_tankPrefab).transform;
+
+            _tanksTransform[i].position = new Vector3(
+                Random.Range(-_spawnPosSpreadXZ, _spawnPosSpreadXZ),
+                0,
+                Random.Range(-_spawnPosSpreadXZ, _spawnPosSpreadXZ));
+        }
+    }
+
+    private void Update()
+    {
+        foreach (Transform tank in _tanksTransform)
+        {
+            tank.LookAt(_playerTransform.position);
+            tank.Translate(0, 0, _forwardSpeed);
+        }
     }
 }

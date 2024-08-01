@@ -1,0 +1,57 @@
+using UnityEngine;
+
+public class TankAIBenchmark : MonoBehaviour
+{
+    [SerializeField] private GameObject _tankPrefab;
+    [SerializeField] private int _numberOfTanks;
+    [SerializeField] private float _forwardSpeed = 0.05f;
+    [SerializeField] private float _startPositionSpreadXZ = 50f;
+    
+    private GameObject[] _tanks;
+    private string _playerTag = "Player";
+    private Transform _playerTransform;
+
+
+    private void Awake()
+    {
+        FindPlayerTransform();
+    }
+
+    private void Start()
+    {
+        _tanks = new GameObject[_numberOfTanks];
+
+        for (int i = 0; i < _numberOfTanks; i++)
+        {
+            _tanks[i] = Instantiate(_tankPrefab);
+            _tanks[i].transform.position = new Vector3(Random.Range(-_startPositionSpreadXZ, _startPositionSpreadXZ), 0, Random.Range(-_startPositionSpreadXZ, _startPositionSpreadXZ));
+        }
+    }
+
+    private void Update()
+    {
+        foreach (GameObject t in _tanks)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                t.transform.LookAt(player.transform.position);
+                t.transform.Translate(0, 0, _forwardSpeed);
+            }
+        } 
+    }
+
+    private void FindPlayerTransform()
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag(_playerTag);
+
+        if (playerObject != null)
+        {
+            _playerTransform = playerObject.transform;
+        }
+        else
+        {
+            Debug.Log($"# Error : Player can not be found! {nameof(playerObject)} == null. - {gameObject.name}");
+        }
+    }
+}
